@@ -1,9 +1,10 @@
 package web
 
 import (
-	"bufio"
 	"html/template"
 	"net/http"
+
+	"github.com/rafaljusiak/daily-dashboard/data"
 )
 
 func DashboardHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,21 +14,13 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := http.Get("https://rafaljusiak.pl")
+	exchangeRate, err := data.GetNBPExchangeRate()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	defer response.Body.Close()
-
-	scanner := bufio.NewScanner(response.Body)
-	data := ""
-	for i := 0; scanner.Scan(); i++ {
-		data += scanner.Text()
-	}
-
-	err = t.Execute(w, data)
+	err = t.Execute(w, exchangeRate)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
