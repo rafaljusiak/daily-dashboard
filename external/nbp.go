@@ -9,7 +9,7 @@ import (
 
 const nbpUrl string = "https://api.nbp.pl/api/exchangerates/rates/A/USD/?format=json"
 
-func GetNBPExchangeRate(client *http.Client) (float64, error) {
+func FetchNBPExchangeRate(client *http.Client) (float64, error) {
 	req, err := http.NewRequest("GET", nbpUrl, nil)
 	if err != nil {
 		return 0.0, err

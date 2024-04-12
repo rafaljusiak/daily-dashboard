@@ -8,8 +8,12 @@ import (
 
 const clockifyUrl string = "https://api.clockify.me/api/v1/"
 
-func GetClockifyData(client *http.Client, ctx *app.AppContext) {
-	req, err := http.NewRequest("GET", clockifyUrl, nil)
+func timeEntriesUrl() string {
+	return ""
+}
+
+func FetchClockifyData(client *http.Client, ctx *app.AppContext) {
+	req, err := http.NewRequest("GET", timeEntriesUrl(), nil)
 	if err != nil {
 		return
 	}

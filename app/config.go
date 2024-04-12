@@ -8,9 +8,11 @@ import (
 
 type Config struct {
 	ClockifyApiKey string
+	HourlyRate     float64
+	WorkspaceId    string
 }
 
-func GetConfig() Config {
+func LoadConfig() Config {
 	path := "./config.json"
 	file, err := os.Open(path)
 

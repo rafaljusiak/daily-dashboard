@@ -1,1 +1,5 @@
-{"ClockifyAPIKey": "<KEY>"}
+{
+    "ClockifyAPIKey": "<KEY>",
+    "HourlyRate": 10.0,
+    "WorkspaceId": "<ID>"
+}

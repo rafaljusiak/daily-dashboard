@@ -15,7 +15,7 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.AppContex
 		return
 	}
 
-	exchangeRate, err := external.GetNBPExchangeRate(ctx.HTTPClient)
+	exchangeRate, err := external.FetchNBPExchangeRate(ctx.HTTPClient)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
