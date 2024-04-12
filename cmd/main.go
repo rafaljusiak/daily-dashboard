@@ -3,16 +3,19 @@ package main
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
-	"github.com/rafaljusiak/daily-dashboard/server"
+	"github.com/rafaljusiak/daily-dashboard/app"
+	"github.com/rafaljusiak/daily-dashboard/handlers"
 )
 
 func main() {
-	r := mux.NewRouter()
+	ctx := app.NewAppContext()
+	router := http.NewServeMux()
 
-	r.HandleFunc("/", web.DashboardHandler).Methods("GET")
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.DashboardHandler(w, r, ctx)
+	})
 
-	err := http.ListenAndServe(":8080", r)
+	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		return
 	}
