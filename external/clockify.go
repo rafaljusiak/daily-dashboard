@@ -24,7 +24,7 @@ func userURL() string {
 	return url.String()
 }
 
-func timeEntriesURL(ctx *app.AppContext, userId int) string {
+func timeEntriesURL(ctx *app.Context, userId int) string {
 	url, err := url.Parse(apiUrl)
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +40,9 @@ func timeEntriesURL(ctx *app.AppContext, userId int) string {
 	return url.String()
 }
 
-func FetchUserId(client *http.Client, ctx *app.AppContext) (int, error) {
+func FetchUserId(ctx *app.Context) (int, error) {
+	client := ctx.HTTPClient
+
 	req, err := http.NewRequest("GET", userURL(), nil)
 	if err != nil {
 		log.Fatal(err)
@@ -68,10 +70,12 @@ func FetchUserId(client *http.Client, ctx *app.AppContext) (int, error) {
 	return userId, nil
 }
 
-func FetchTimeEntries(client *http.Client, ctx *app.AppContext) ([]interface{}, error) {
-	userId, err := FetchUserId(client, ctx)
+func FetchTimeEntries(ctx *app.Context) ([]interface{}, error) {
+	client := ctx.HTTPClient
+
+	userId, err := FetchUserId(ctx)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	req, err := http.NewRequest("GET", timeEntriesURL(ctx, userId), nil)

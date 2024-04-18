@@ -8,7 +8,7 @@ import (
 	"github.com/rafaljusiak/daily-dashboard/external"
 )
 
-func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.AppContext) {
+func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
 	t, err := template.ParseFiles("templates/dashboard.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	ctx := app.NewAppContext()
+	ctx := app.NewContext()
 	router := http.NewServeMux()
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
