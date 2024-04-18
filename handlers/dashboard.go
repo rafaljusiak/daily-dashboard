@@ -8,6 +8,11 @@ import (
 	"github.com/rafaljusiak/daily-dashboard/external"
 )
 
+type DashboardData struct {
+	ExchangeRate	float64
+	TimeEntries 	[]interface{}
+}
+
 func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
 	t, err := template.ParseFiles("templates/dashboard.html")
 	if err != nil {
@@ -21,7 +26,18 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) 
 		return
 	}
 
-	err = t.Execute(w, exchangeRate)
+	timeEntries, err := external.FetchTimeEntries(ctx)
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+	data := DashboardData{
+        ExchangeRate: exchangeRate,
+        TimeEntries:  timeEntries,
+    }
+
+	err = t.Execute(w, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

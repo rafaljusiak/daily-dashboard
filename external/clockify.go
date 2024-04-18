@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
 	"github.com/rafaljusiak/daily-dashboard/data"
@@ -20,17 +19,17 @@ func userURL() string {
 		log.Fatal(err)
 	}
 
-	url.JoinPath("user")
+	url = url.JoinPath("user")
 	return url.String()
 }
 
-func timeEntriesURL(ctx *app.Context, userId int) string {
+func timeEntriesURL(ctx *app.Context, userId string) string {
 	url, err := url.Parse(apiUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	url.JoinPath("workspaces", ctx.Config.WorkspaceId, "user", strconv.Itoa(userId), "time-entries")
+	url = url.JoinPath("workspaces", ctx.Config.WorkspaceId, "user", userId, "time-entries")
 
 	urlQuery := url.Query()
 	urlQuery.Add("page-size", "5000")
@@ -40,34 +39,35 @@ func timeEntriesURL(ctx *app.Context, userId int) string {
 	return url.String()
 }
 
-func FetchUserId(ctx *app.Context) (int, error) {
+func FetchUserId(ctx *app.Context) (string, error) {
 	client := ctx.HTTPClient
 
-	req, err := http.NewRequest("GET", userURL(), nil)
+	url := userURL()
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
+	req.Header.Add("user-agent", "Go/Daily-Dashboard")
 	req.Header.Add("x-api-key", ctx.Config.ClockifyApiKey)
 
+	log.Printf("Sending request to %s", url)
 	response, err := client.Do(req)
 
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	userData, err := data.ReadJson(body)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-	userId := userData["id"].(int)
-
-	return userId, nil
+	return userData["id"].(string), nil
 }
 
 func FetchTimeEntries(ctx *app.Context) ([]interface{}, error) {
