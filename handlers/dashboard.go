@@ -10,7 +10,7 @@ import (
 
 type DashboardData struct {
 	ExchangeRate	float64
-	TimeEntries 	[]interface{}
+	TimeEntries 	[]external.ClockifyTimeEntryData
 }
 
 func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) {

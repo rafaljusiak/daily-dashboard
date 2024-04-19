@@ -2,16 +2,24 @@ package external
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
-	"github.com/rafaljusiak/daily-dashboard/data"
 )
 
 const apiUrl string = "https://api.clockify.me/api/v1/"
+
+type ClockifyUserData struct {
+	Id string `json:"id"`
+}
+
+type ClockifyTimeEntryData struct {
+	TimeInterval struct {
+		Duration string `json:"duration"`
+	} `json:"timeInterval"`
+}
 
 func userURL() string {
 	url, err := url.Parse(apiUrl)
@@ -52,25 +60,18 @@ func FetchUserId(ctx *app.Context) (string, error) {
 
 	log.Printf("Sending request to %s", url)
 	response, err := client.Do(req)
-
 	if err != nil {
 		return "", err
 	}
 	defer response.Body.Close()
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return "", err
-	}
+	var responseData ClockifyUserData
+	err = json.NewDecoder(response.Body).Decode(&responseData)
 
-	userData, err := data.ReadJson(body)
-	if err != nil {
-		return "", err
-	}
-	return userData["id"].(string), nil
+	return responseData.Id, err
 }
 
-func FetchTimeEntries(ctx *app.Context) ([]interface{}, error) {
+func FetchTimeEntries(ctx *app.Context) ([]ClockifyTimeEntryData, error) {
 	client := ctx.HTTPClient
 
 	userId, err := FetchUserId(ctx)
@@ -88,18 +89,10 @@ func FetchTimeEntries(ctx *app.Context) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer response.Body.Close()
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
+	var responseData []ClockifyTimeEntryData
+	err = json.NewDecoder(response.Body).Decode(&responseData)
 
-	arr := []interface{}{}
-	if json.Unmarshal(body, &arr) != nil {
-		return nil, err
-	}
-
-	return arr, nil
+	return responseData, err
 }
