@@ -1,4 +1,4 @@
-.PHONY: all build clean run
+.PHONY: all build clean run test
 
 all: build
 
@@ -10,3 +10,6 @@ clean:
 
 run:
 	docker compose up
+
+test:
+	docker compose run --rm app go test ./...

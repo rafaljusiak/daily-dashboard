@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/url"
+	"regexp"
+	"strconv"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
 )
@@ -90,4 +92,21 @@ func FetchTimeEntries(ctx *app.Context) ([]ClockifyTimeEntryData, error) {
 	err = json.NewDecoder(response.Body).Decode(&responseData)
 
 	return responseData, err
+}
+
+func ConvertDurationToMinutes(duration string) (int, error) {
+	if len(duration) == 0 {
+		return 0, nil
+	}
+
+	re := regexp.MustCompile(`PT((?P<hours>\d+)H)?((?P<minutes>\d+)M)?`)
+	matches := re.FindStringSubmatch(duration)
+	if matches == nil {
+		return 0, nil
+	}
+	log.Println(matches)
+	hours, _ := strconv.Atoi(matches[re.SubexpIndex("hours")])
+	minutes, _ := strconv.Atoi(matches[re.SubexpIndex("minutes")])
+
+	return hours*60 + minutes, nil
 }
