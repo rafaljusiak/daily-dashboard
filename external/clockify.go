@@ -3,7 +3,6 @@ package external
 import (
 	"encoding/json"
 	"log"
-	"net/http"
 	"net/url"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
@@ -49,16 +48,12 @@ func timeEntriesURL(ctx *app.Context, userId string) string {
 
 func FetchUserId(ctx *app.Context) (string, error) {
 	client := ctx.HTTPClient
-
-	url := userURL()
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := PrepareHTTPRequest(userURL())
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("user-agent", "Go/Daily-Dashboard")
 	req.Header.Add("x-api-key", ctx.Config.ClockifyApiKey)
 
-	log.Printf("Sending request to %s", url)
 	response, err := client.Do(req)
 	if err != nil {
 		return "", err
@@ -79,7 +74,7 @@ func FetchTimeEntries(ctx *app.Context) ([]ClockifyTimeEntryData, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", timeEntriesURL(ctx, userId), nil)
+	req, err := PrepareHTTPRequest(timeEntriesURL(ctx, userId))
 	if err != nil {
 		return nil, err
 	}

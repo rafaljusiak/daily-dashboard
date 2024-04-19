@@ -14,11 +14,10 @@ type NBPCurrencyData struct {
 const nbpUrl string = "https://api.nbp.pl/api/exchangerates/rates/A/USD/?format=json"
 
 func FetchNBPExchangeRate(client *http.Client) (float64, error) {
-	req, err := http.NewRequest("GET", nbpUrl, nil)
+	req, err := PrepareHTTPRequest(nbpUrl)
 	if err != nil {
 		return 0.0, err
 	}
-	req.Header.Add("User-Agent", "Go/Daily-Dashboard")
 
 	response, err := client.Do(req)
 	if err != nil {

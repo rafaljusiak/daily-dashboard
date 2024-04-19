@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
-	ClockifyApiKey string
-	HourlyRate     float64
-	WorkspaceId    string
+	ClockifyApiKey 	string
+	HourlyRate     	float64
+	Port			string
+	WorkspaceId    	string
 }
 
 func LoadConfig() Config {

@@ -9,8 +9,8 @@ import (
 )
 
 type DashboardData struct {
-	ExchangeRate	float64
-	TimeEntries 	[]external.ClockifyTimeEntryData
+	ExchangeRate float64
+	TimeEntries  []external.ClockifyTimeEntryData
 }
 
 func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
@@ -28,14 +28,14 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) 
 
 	timeEntries, err := external.FetchTimeEntries(ctx)
 	if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	data := DashboardData{
-        ExchangeRate: exchangeRate,
-        TimeEntries:  timeEntries,
-    }
+		ExchangeRate: exchangeRate,
+		TimeEntries:  timeEntries,
+	}
 
 	err = t.Execute(w, data)
 	if err != nil {

@@ -1,5 +1,6 @@
 {
     "ClockifyAPIKey": "<KEY>",
     "HourlyRate": 10.0,
+    "Port": ":8080",
     "WorkspaceId": "<ID>"
 }
