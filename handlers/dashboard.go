@@ -5,11 +5,13 @@ import (
 	"net/http"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
+	"github.com/rafaljusiak/daily-dashboard/calc"
 	"github.com/rafaljusiak/daily-dashboard/external"
 )
 
 type DashboardData struct {
 	ExchangeRate float64
+	Minutes      int
 	TimeEntries  []external.ClockifyTimeEntryData
 }
 
@@ -32,8 +34,10 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) 
 		return
 	}
 
+	minutes := calc.SumDuration(timeEntries)
 	data := DashboardData{
 		ExchangeRate: exchangeRate,
+		Minutes:      minutes,
 		TimeEntries:  timeEntries,
 	}
 

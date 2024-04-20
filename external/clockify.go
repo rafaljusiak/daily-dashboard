@@ -104,7 +104,7 @@ func ConvertDurationToMinutes(duration string) (int, error) {
 	if matches == nil {
 		return 0, nil
 	}
-	log.Println(matches)
+	
 	hours, _ := strconv.Atoi(matches[re.SubexpIndex("hours")])
 	minutes, _ := strconv.Atoi(matches[re.SubexpIndex("minutes")])
 
