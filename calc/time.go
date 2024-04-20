@@ -1,6 +1,8 @@
 package calc
 
 import (
+	"fmt"
+
 	"github.com/rafaljusiak/daily-dashboard/external"
 )
 
@@ -14,4 +16,10 @@ func SumDuration(timeEntries []external.ClockifyTimeEntryData) (int, error) {
 		minutes += convertedDuration
 	}
 	return minutes, nil
+}
+
+func MinutesToString(minutes int) string {
+	h := minutes / 60
+	m := minutes % 60
+	return fmt.Sprintf("%dh %02dm", h, m)
 }

@@ -11,7 +11,7 @@ import (
 
 type DashboardData struct {
 	ExchangeRate float64
-	Minutes      int
+	Minutes      string
 	TimeEntries  []external.ClockifyTimeEntryData
 }
 
@@ -34,10 +34,10 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) 
 		return
 	}
 
-	minutes := calc.SumDuration(timeEntries)
+	minutes, _ := calc.SumDuration(timeEntries)
 	data := DashboardData{
 		ExchangeRate: exchangeRate,
-		Minutes:      minutes,
+		Minutes:      calc.MinutesToString(minutes),
 		TimeEntries:  timeEntries,
 	}
 
