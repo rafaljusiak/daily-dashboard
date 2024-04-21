@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
 )
@@ -32,6 +33,10 @@ func userURL() string {
 	return url.String()
 }
 
+func firstDayOfMonth(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location())
+}
+
 func timeEntriesURL(ctx *app.Context, userId string) string {
 	url, err := url.Parse(apiUrl)
 	if err != nil {
@@ -42,7 +47,7 @@ func timeEntriesURL(ctx *app.Context, userId string) string {
 
 	urlQuery := url.Query()
 	urlQuery.Add("page-size", "5000")
-	urlQuery.Add("start", "2024-04-01T00:00:00Z") // TODO get start of the current month
+	urlQuery.Add("start", firstDayOfMonth(time.Now()).Format(time.RFC3339))
 
 	url.RawQuery = urlQuery.Encode()
 	return url.String()
