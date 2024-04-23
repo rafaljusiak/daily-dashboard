@@ -10,10 +10,11 @@ import (
 )
 
 type DashboardData struct {
+	AlreadyWorked string
 	CurrentIncome float64
 	ExchangeRate  float64
-	Minutes       string
 	TimeEntries   []external.ClockifyTimeEntryData
+	WorkingHours  string
 }
 
 func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
@@ -41,19 +42,26 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 	if err != nil {
 		return nil, err
 	}
-
+ 
 	timeEntries, err := external.FetchTimeEntries(ctx)
 	if err != nil {
 		return nil, err
 	}
-	minutes, _ := calc.SumDuration(timeEntries)
 
-	currentIncome := (float64(minutes) / 60.0) * ctx.Config.HourlyRate * exchangeRate
+	alreadyWorkedMinutes, _ := calc.SumDuration(timeEntries)
+	currentIncome := calc.Income(
+		calc.MinutesToHours(alreadyWorkedMinutes), 
+		ctx.Config.HourlyRate, 
+		exchangeRate,
+	)
+	workingHours := calc.WorkingHoursForCurrentMonth()
+
 	data := &DashboardData{
+		AlreadyWorked: calc.MinutesToString(alreadyWorkedMinutes),
 		CurrentIncome: currentIncome,
 		ExchangeRate:  exchangeRate,
-		Minutes:       calc.MinutesToString(minutes),
 		TimeEntries:   timeEntries,
+		WorkingHours:  calc.MinutesToString(workingHours),
 	}
 
 	return data, nil

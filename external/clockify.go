@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
+	"github.com/rafaljusiak/daily-dashboard/calc"
 )
 
 const apiUrl string = "https://api.clockify.me/api/v1/"
@@ -33,10 +34,6 @@ func userURL() string {
 	return url.String()
 }
 
-func firstDayOfMonth(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location())
-}
-
 func timeEntriesURL(ctx *app.Context, userId string) string {
 	url, err := url.Parse(apiUrl)
 	if err != nil {
@@ -47,7 +44,7 @@ func timeEntriesURL(ctx *app.Context, userId string) string {
 
 	urlQuery := url.Query()
 	urlQuery.Add("page-size", "5000")
-	urlQuery.Add("start", firstDayOfMonth(time.Now()).Format(time.RFC3339))
+	urlQuery.Add("start", calc.FirstDayOfMonth(time.Now()).Format(time.RFC3339))
 
 	url.RawQuery = urlQuery.Encode()
 	return url.String()

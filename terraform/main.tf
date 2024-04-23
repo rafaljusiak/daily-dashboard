@@ -39,7 +39,7 @@ resource "google_compute_instance" "default" {
 
   boot_disk {
     initialize_params {
-      image = ""
+      image = "ubuntu-2204-lts"
     }
   }
 
