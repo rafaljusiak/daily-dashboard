@@ -7,6 +7,7 @@ import (
 	"github.com/rafaljusiak/daily-dashboard/app"
 	"github.com/rafaljusiak/daily-dashboard/calc"
 	"github.com/rafaljusiak/daily-dashboard/external"
+	"github.com/rafaljusiak/daily-dashboard/timeutils"
 )
 
 type DashboardData struct {
@@ -42,7 +43,7 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 	if err != nil {
 		return nil, err
 	}
- 
+
 	timeEntries, err := external.FetchTimeEntries(ctx)
 	if err != nil {
 		return nil, err
@@ -50,18 +51,18 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 
 	alreadyWorkedMinutes, _ := calc.SumDuration(timeEntries)
 	currentIncome := calc.Income(
-		calc.MinutesToHours(alreadyWorkedMinutes), 
-		ctx.Config.HourlyRate, 
+		timeutils.MinutesToHours(alreadyWorkedMinutes),
+		ctx.Config.HourlyRate,
 		exchangeRate,
 	)
-	workingHours := calc.WorkingHoursForCurrentMonth()
+	workingHours := timeutils.WorkingHoursForCurrentMonth()
 
 	data := &DashboardData{
-		AlreadyWorked: calc.MinutesToString(alreadyWorkedMinutes),
+		AlreadyWorked: timeutils.MinutesToString(alreadyWorkedMinutes),
 		CurrentIncome: currentIncome,
 		ExchangeRate:  exchangeRate,
 		TimeEntries:   timeEntries,
-		WorkingHours:  calc.MinutesToString(workingHours),
+		WorkingHours:  timeutils.MinutesToString(workingHours),
 	}
 
 	return data, nil

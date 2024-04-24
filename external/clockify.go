@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/url"
-	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
-	"github.com/rafaljusiak/daily-dashboard/calc"
+	"github.com/rafaljusiak/daily-dashboard/timeutils"
 )
 
 const apiUrl string = "https://api.clockify.me/api/v1/"
@@ -44,7 +42,7 @@ func timeEntriesURL(ctx *app.Context, userId string) string {
 
 	urlQuery := url.Query()
 	urlQuery.Add("page-size", "5000")
-	urlQuery.Add("start", dateutils.FirstDayOfMonth(time.Now()).Format(time.RFC3339))
+	urlQuery.Add("start", timeutils.FirstDayOfMonth(time.Now()).Format(time.RFC3339))
 
 	url.RawQuery = urlQuery.Encode()
 	return url.String()
@@ -94,21 +92,4 @@ func FetchTimeEntries(ctx *app.Context) ([]ClockifyTimeEntryData, error) {
 	err = json.NewDecoder(response.Body).Decode(&responseData)
 
 	return responseData, err
-}
-
-func ConvertDurationToMinutes(duration string) (int, error) {
-	if len(duration) == 0 {
-		return 0, nil
-	}
-
-	re := regexp.MustCompile(`PT((?P<hours>\d+)H)?((?P<minutes>\d+)M)?`)
-	matches := re.FindStringSubmatch(duration)
-	if matches == nil {
-		return 0, nil
-	}
-	
-	hours, _ := strconv.Atoi(matches[re.SubexpIndex("hours")])
-	minutes, _ := strconv.Atoi(matches[re.SubexpIndex("minutes")])
-
-	return hours*60 + minutes, nil
 }
