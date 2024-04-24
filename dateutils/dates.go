@@ -1,4 +1,4 @@
-package calc
+package dateutils
 
 import (
 	"fmt"

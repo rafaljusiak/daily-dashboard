@@ -44,7 +44,7 @@ func timeEntriesURL(ctx *app.Context, userId string) string {
 
 	urlQuery := url.Query()
 	urlQuery.Add("page-size", "5000")
-	urlQuery.Add("start", calc.FirstDayOfMonth(time.Now()).Format(time.RFC3339))
+	urlQuery.Add("start", dateutils.FirstDayOfMonth(time.Now()).Format(time.RFC3339))
 
 	url.RawQuery = urlQuery.Encode()
 	return url.String()
