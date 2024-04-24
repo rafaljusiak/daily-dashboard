@@ -2,6 +2,7 @@ package timeutils
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"time"
@@ -14,7 +15,12 @@ func FirstDayOfMonth(t time.Time) time.Time {
 func MinutesToString(minutes int) string {
 	h := minutes / 60
 	m := minutes % 60
-	return fmt.Sprintf("%dh %02dm", h, m)
+	mAbs := int(math.Abs(float64(m)))
+	return fmt.Sprintf("%dh %02dm", h, mAbs)
+}
+
+func HoursToString(hours int) string {
+	return fmt.Sprintf("%dh 00m", hours)
 }
 
 func MinutesToHours(minutes int) float64 {
@@ -24,8 +30,27 @@ func MinutesToHours(minutes int) float64 {
 func WorkingHoursForCurrentMonth() int {
 	now := time.Now()
 	firstDayOfMonth := FirstDayOfMonth(now)
-	_ = firstDayOfMonth
-	return 0
+	lastDayOfMonth := firstDayOfMonth.AddDate(0, 1, -1)
+
+	return WorkingHoursBetweenDates(firstDayOfMonth, lastDayOfMonth)
+}
+
+func WorkingHoursUntilToday() int {
+	now := time.Now()
+	firstDayOfMonth := FirstDayOfMonth(now)
+
+	return WorkingHoursBetweenDates(firstDayOfMonth, now)
+}
+
+func WorkingHoursBetweenDates(from, to time.Time) int {
+	counter := 0
+	for d := from; !d.After(to); d = d.AddDate(0, 0, 1) {
+		if d.Weekday()%6 != 0 {
+			counter++
+		}
+	}
+
+	return counter * 8
 }
 
 func ConvertDurationToMinutes(duration string) (int, error) {
