@@ -19,7 +19,9 @@ func main() {
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.DashboardHandler(w, r, ctx)
 	})
-	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {})
+	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "templates/favicon.ico")
+	})
 
 	port := ctx.Config.Port
 	log.Printf("Server is running on port %v", port)
