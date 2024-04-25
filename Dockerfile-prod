@@ -12,6 +12,8 @@ RUN CGO_ENABLED=0 go build -o ./binary ./cmd
 
 # Run stage
 FROM alpine
-COPY --from=builder /app/binary .
+COPY ./config.json .
+COPY ./templates ./templates
+COPY --from=builder /app/binary ./
 EXPOSE 8080
 CMD ["./binary"]

@@ -38,7 +38,7 @@ docker push $TAG || { echo "Error: Docker push failed."; exit 1; }
 
 cd $TERRAFORM_DIR
 echo -e "\e[36m🚀 Applying infrastructure...\e[0m"
-terraform apply
+terraform apply -auto-approve
 
 echo -e "\e[32m✅ Script execution completed successfully.\e[0m"
 cd $PROJECT_ROOT_DIR
