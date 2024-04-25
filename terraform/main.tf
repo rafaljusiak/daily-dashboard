@@ -19,61 +19,45 @@ provider "google" {
   project = local.json_config["GCPProjectId"]
 }
 
-resource "google_compute_network" "vpc_network" {
-  name                    = "daily-dashboard-network"
-  auto_create_subnetworks = false
+resource "google_artifact_registry_repository" "dailydashboardrepository" {
+  location      = local.json_config["GCPRegion"]
+  repository_id = "daily-dashboard-repository"
+  format        = "DOCKER"
 }
 
-resource "google_compute_subnetwork" "default" {
-  name          = "daily-dashboard-subnet"
-  network       = google_compute_network.vpc_network.id
-  ip_cidr_range = "10.0.0.0/24"
-  region        = local.json_config["GCPRegion"]
-}
-
-resource "google_compute_instance" "default" {
-  name         = "daily-dashboard"
-  machine_type = "f1-micro"
-  zone         = local.json_config["GCPZone"]
-  tags         = ["ssh"]
-
-  boot_disk {
-    initialize_params {
-      image = "ubuntu-2204-lts"
+resource "google_cloud_run_service" "dailydashboard" {
+  name     = "dailydashboard"
+  location = local.json_config["GCPRegion"]
+  template {
+    spec {
+      containers {
+        image = "${local.json_config["GCPRegion"]}-docker.pkg.dev/${local.json_config["GCPProjectId"]}/daily-dashboard-repository/daily-dashboard"
+      }
     }
   }
-
-  metadata_startup_script = "sudo apt update"
-  network_interface {
-    subnetwork = google_compute_subnetwork.default.id
-    access_config {}
+  traffic {
+    percent         = 100
+    latest_revision = true
   }
 }
 
-resource "google_compute_firewall" "ssh" {
-  name = "allow-ssh"
-  allow {
-    ports    = ["22"]
-    protocol = "tcp"
+data "google_iam_policy" "noauth" {
+  binding {
+    role = "roles/run.invoker"
+    members = [
+      "allUsers",
+    ]
   }
-  direction     = "INGRESS"
-  network       = google_compute_network.vpc_network.id
-  priority      = 1000
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["ssh"]
 }
 
-resource "google_compute_firewall" "daily-dashboard" {
-  name    = "daily-dashboard-firewall"
-  network = google_compute_network.vpc_network.id
+resource "google_cloud_run_service_iam_policy" "noauth" {
+  location = google_cloud_run_service.dailydashboard.location
+  project  = google_cloud_run_service.dailydashboard.project
+  service  = google_cloud_run_service.dailydashboard.name
 
-  allow {
-    protocol = "tcp"
-    ports    = ["8080"]
-  }
-  source_ranges = ["0.0.0.0/0"]
+  policy_data = data.google_iam_policy.noauth.policy_data
 }
 
-output "Web-server-URL" {
-  value = join("", ["http://", google_compute_instance.default.network_interface.0.access_config.0.nat_ip, ":8080"])
+output "url" {
+  value = google_cloud_run_service.dailydashboard.status[0].url
 }
