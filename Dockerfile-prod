@@ -1,0 +1,17 @@
+# Build stage
+FROM golang:1.22.2-bookworm AS builder
+
+RUN apt install gcc g++ make ca-certificates
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+RUN CGO_ENABLED=0 go build -o ./binary ./cmd
+
+# Run stage
+FROM alpine
+COPY --from=builder /app/binary .
+EXPOSE 8080
+CMD ["./binary"]
