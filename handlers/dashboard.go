@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -41,17 +42,47 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) 
 }
 
 func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
-	exchangeRate, err := external.FetchNBPExchangeRate(ctx.HTTPClient)
-	if err != nil {
-		return nil, err
+	exchangeRateChan := make(chan float64)
+	timeEntriesChan := make(chan []external.ClockifyTimeEntryData)
+
+	errChan := make(chan error, 2)
+
+	go func() {
+		exchangeRate, err := external.FetchNBPExchangeRate(ctx.HTTPClient)
+		if err != nil {
+			errChan <- fmt.Errorf("error while fetching NBP exchange rate: %v", err)
+			return
+		}
+		exchangeRateChan <- exchangeRate
+	}()
+
+	go func() {
+		timeEntries, err := external.FetchTimeEntries(ctx)
+		if err != nil {
+			errChan <- fmt.Errorf("error while fetching Clockify time entries: %v", err)
+			return
+		}
+		timeEntriesChan <- timeEntries
+	}()
+
+	var exchangeRate float64
+	var timeEntries []external.ClockifyTimeEntryData
+	for i := 0; i < 2; i++ {
+		select {
+		case rate := <-exchangeRateChan:
+			exchangeRate = rate
+		case entries := <-timeEntriesChan:
+			timeEntries = entries
+		case err := <-errChan:
+			return nil, err
+		}
 	}
 
-	timeEntries, err := external.FetchTimeEntries(ctx)
+	alreadyWorkedMinutes, err := calc.SumDuration(timeEntries)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error calculating already worked minutes: %v", err)
 	}
 
-	alreadyWorkedMinutes, _ := calc.SumDuration(timeEntries)
 	currentIncome := calc.Income(
 		timeutils.MinutesToHours(alreadyWorkedMinutes),
 		ctx.Config.HourlyRate,
