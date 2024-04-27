@@ -17,6 +17,7 @@ type DashboardData struct {
 	ExchangeRate    float64
 	MinimumHours    string
 	OptimalIncome   float64
+	WeatherForecast template.HTML
 	WorkingHours    string
 	WorkingTimeDiff string
 }
@@ -44,8 +45,9 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) 
 func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 	exchangeRateChan := make(chan float64)
 	timeEntriesChan := make(chan []external.ClockifyTimeEntryData)
+	wttrChan := make(chan string)
 
-	errChan := make(chan error, 2)
+	errChan := make(chan error, 3)
 
 	go func() {
 		exchangeRate, err := external.FetchNBPExchangeRate(ctx.HTTPClient)
@@ -65,14 +67,26 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 		timeEntriesChan <- timeEntries
 	}()
 
+	go func() {
+		wttrData, err := external.FetchWttrData(ctx)
+		if err != nil {
+			errChan <- fmt.Errorf("error while fetching wttr.in data: %v", err)
+			return
+		}
+		wttrChan <- wttrData
+	}()
+
 	var exchangeRate float64
 	var timeEntries []external.ClockifyTimeEntryData
-	for i := 0; i < 2; i++ {
+	var wttrString string
+	for i := 0; i < 3; i++ {
 		select {
 		case rate := <-exchangeRateChan:
 			exchangeRate = rate
 		case entries := <-timeEntriesChan:
 			timeEntries = entries
+		case wttrData := <-wttrChan:
+			wttrString = wttrData
 		case err := <-errChan:
 			return nil, err
 		}
@@ -105,6 +119,7 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 		ExchangeRate:    exchangeRate,
 		MinimumHours:    timeutils.HoursToString(minimumHours),
 		OptimalIncome:   optimalIncome,
+		WeatherForecast: template.HTML(wttrString),
 		WorkingHours:    timeutils.HoursToString(workingHours),
 		WorkingTimeDiff: timeutils.MinutesToString(workingTimeDiff),
 	}
