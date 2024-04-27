@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -n "$1" ] && [ "$1" != "replace" ]; then
+    echo "Error: ./blast/off.sh can be executed only with the \"replace\" option"
+    exit 1
+fi
+
 if [ "$(realpath "$0" 2>/dev/null)" != "$(realpath ./blast/off.sh 2>/dev/null)" ]; then
     echo "Error: Please execute the script as ./blast/off.sh"
     exit 1
@@ -39,6 +44,14 @@ docker push $TAG || { echo "Error: Docker push failed."; exit 1; }
 cd $TERRAFORM_DIR
 echo -e "\e[36m🚀 Applying infrastructure...\e[0m"
 terraform apply -auto-approve
+
+if [ "$1" = "replace" ]; then
+    echo -e "\e[36m🚀 Replacing with the new version...\e[0m"
+    terraform apply -replace="google_cloud_run_service.dailydashboard"
+else
+    echo -e "\e[36m🚀 Applying infrastructure...\e[0m"
+    terraform apply -auto-approve
+fi
 
 echo -e "\e[32m✅ Script execution completed successfully.\e[0m"
 cd $PROJECT_ROOT_DIR
