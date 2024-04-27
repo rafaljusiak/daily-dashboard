@@ -47,7 +47,7 @@ terraform apply -auto-approve
 
 if [ "$1" = "replace" ]; then
     echo -e "\e[36m🚀 Replacing with the new version...\e[0m"
-    terraform apply -replace="google_cloud_run_service.dailydashboard"
+    terraform apply -replace="google_cloud_run_service.dailydashboard" -auto-approve
 else
     echo -e "\e[36m🚀 Applying infrastructure...\e[0m"
     terraform apply -auto-approve
