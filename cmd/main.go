@@ -16,10 +16,10 @@ func main() {
 	ctx := app.NewContext()
 	router := http.NewServeMux()
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		handlers.DashboardHandler(w, r, ctx)
 	})
-	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "templates/favicon.ico")
 	})
 
