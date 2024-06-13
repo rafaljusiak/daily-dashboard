@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
 	"github.com/rafaljusiak/daily-dashboard/handlers"
@@ -25,7 +26,15 @@ func main() {
 
 	port := ctx.Config.Port
 	log.Printf("Server is running on port %v", port)
-	err := http.ListenAndServe(port, router)
+
+	s := &http.Server{
+		Addr:           port,
+		Handler:        router,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	err := s.ListenAndServe()
 	if err != nil {
 		return
 	}
