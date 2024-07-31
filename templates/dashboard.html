@@ -5,6 +5,12 @@
     <title>Daily Dashboard</title>
 </head>
 <body>
+	{{if .Errors}}
+		{{range .Errors}}
+			<p style="color: red">{{.}}</p>
+		{{end}}
+	{{end}}
+
     <p>Already worked: {{.AlreadyWorked}}</p>
     <p>Minimum: {{.MinimumHours}}</p>
     <p>Diff: {{.WorkingTimeDiff}}</p>

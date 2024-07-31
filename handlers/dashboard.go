@@ -14,6 +14,7 @@ import (
 type DashboardData struct {
 	AlreadyWorked   string
 	CurrentIncome   float64
+	Errors          []string
 	ExchangeRate    float64
 	MinimumHours    string
 	OptimalIncome   float64
@@ -79,6 +80,9 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 	var exchangeRate float64
 	var timeEntries []external.ClockifyTimeEntryData
 	var wttrString string
+
+	errors := []string{}
+
 	for i := 0; i < 3; i++ {
 		select {
 		case rate := <-exchangeRateChan:
@@ -88,13 +92,13 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 		case wttrData := <-wttrChan:
 			wttrString = wttrData
 		case err := <-errChan:
-			return nil, err
+			errors = append(errors, err.Error())
 		}
 	}
 
 	alreadyWorkedMinutes, err := calc.SumDuration(timeEntries)
 	if err != nil {
-		return nil, fmt.Errorf("error calculating already worked minutes: %v", err)
+		errors = append(errors, fmt.Sprintf("error calculating already worked minutes: %v", err))
 	}
 
 	currentIncome := calc.Income(
@@ -116,6 +120,7 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 	data := &DashboardData{
 		AlreadyWorked:   timeutils.MinutesToString(alreadyWorkedMinutes),
 		CurrentIncome:   currentIncome,
+		Errors:          errors,
 		ExchangeRate:    exchangeRate,
 		MinimumHours:    timeutils.HoursToString(minimumHours),
 		OptimalIncome:   optimalIncome,

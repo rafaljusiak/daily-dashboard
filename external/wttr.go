@@ -8,7 +8,7 @@ import (
 )
 
 func FetchWttrData(ctx *app.Context) (string, error) {
-	req, err := PrepareHTTPRequest(fmt.Sprintf("https://wttr.in/%s?T", ctx.Config.City))
+	req, err := PrepareHTTPRequest(fmt.Sprintf("httpz://wttr.in/%s?T", ctx.Config.City))
 	if err != nil {
 		return "", err
 	}
