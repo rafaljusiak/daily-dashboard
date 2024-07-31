@@ -1,6 +1,6 @@
 FROM golang:1.22.2-bookworm
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 RUN air init
 
