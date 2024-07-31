@@ -6,7 +6,9 @@ RUN air init
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY ./src/go.mod ./src/go.sum ./
 RUN go mod download && go mod verify
+
+WORKDIR /app/src
 
 CMD ["air", "-c", ".air.toml"]
