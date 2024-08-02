@@ -7,13 +7,13 @@ import (
 	"github.com/rafaljusiak/daily-dashboard/app"
 )
 
-func FetchWttrData(ctx *app.Context) (string, error) {
-	req, err := PrepareHTTPRequest(fmt.Sprintf("https://wttr.in/%s?T", ctx.Config.City))
+func FetchWttrData(appCtx *app.AppContext) (string, error) {
+	req, err := PrepareHTTPRequest(fmt.Sprintf("https://wttr.in/%s?T", appCtx.Config.City))
 	if err != nil {
 		return "", err
 	}
 
-	response, err := ctx.HTTPClient.Do(req)
+	response, err := appCtx.HTTPClient.Do(req)
 	if err != nil {
 		return "", err
 	}
