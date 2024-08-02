@@ -103,14 +103,14 @@ func prepareDashboardData(appCtx *app.AppContext) (*DashboardData, error) {
 
 	currentIncome := calc.Income(
 		timeutils.MinutesToHours(alreadyWorkedMinutes),
-		ctx.Config.HourlyRate,
+		appCtx.Config.HourlyRate,
 		exchangeRate,
 	)
 
 	workingHours := timeutils.WorkingHoursForCurrentMonth()
 	optimalIncome := calc.Income(
 		float64(workingHours),
-		ctx.Config.HourlyRate,
+		appCtx.Config.HourlyRate,
 		exchangeRate,
 	)
 
