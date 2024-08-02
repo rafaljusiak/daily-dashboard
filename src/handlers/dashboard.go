@@ -23,14 +23,14 @@ type DashboardData struct {
 	WorkingTimeDiff string
 }
 
-func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
+func DashboardHandler(w http.ResponseWriter, r *http.Request, appCtx *app.AppContext) {
 	t, err := template.ParseFiles("templates/dashboard.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	data, err := prepareDashboardData(ctx)
+	data, err := prepareDashboardData(appCtx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -43,7 +43,7 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request, ctx *app.Context) 
 	}
 }
 
-func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
+func prepareDashboardData(appCtx *app.AppContext) (*DashboardData, error) {
 	exchangeRateChan := make(chan float64)
 	timeEntriesChan := make(chan []external.ClockifyTimeEntryData)
 	wttrChan := make(chan string)
@@ -51,7 +51,7 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 	errChan := make(chan error, 3)
 
 	go func() {
-		exchangeRate, err := external.FetchNBPExchangeRate(ctx.HTTPClient)
+		exchangeRate, err := external.FetchNBPExchangeRate(appCtx.HTTPClient)
 		if err != nil {
 			errChan <- fmt.Errorf("error while fetching NBP exchange rate: %v", err)
 			return
@@ -60,7 +60,7 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 	}()
 
 	go func() {
-		timeEntries, err := external.FetchTimeEntries(ctx)
+		timeEntries, err := external.FetchTimeEntries(appCtx)
 		if err != nil {
 			errChan <- fmt.Errorf("error while fetching Clockify time entries: %v", err)
 			return
@@ -69,7 +69,7 @@ func prepareDashboardData(ctx *app.Context) (*DashboardData, error) {
 	}()
 
 	go func() {
-		wttrData, err := external.FetchWttrData(ctx)
+		wttrData, err := external.FetchWttrData(appCtx)
 		if err != nil {
 			errChan <- fmt.Errorf("error while fetching wttr.in data: %v", err)
 			return

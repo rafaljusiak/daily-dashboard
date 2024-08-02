@@ -4,13 +4,13 @@ import (
 	"net/http"
 )
 
-type Context struct {
+type AppContext struct {
 	Config     Config
 	HTTPClient *http.Client
 }
 
-func NewContext() *Context {
-	return &Context{
+func NewAppContext() *AppContext {
+	return &AppContext{
 		Config:     LoadConfig(),
 		HTTPClient: &http.Client{},
 	}

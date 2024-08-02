@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
@@ -11,15 +12,25 @@ type Config struct {
 	ClockifyApiKey string
 	HourlyRate     float64
 	Port           string
+	RootDir        string
 	WorkspaceId    string
 }
 
+func GetRootDir() string {
+	path, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return filepath.Dir(path)
+}
+
 func LoadConfig() Config {
-	path := "../config.json"
-	file, err := os.Open(path)
+	rootDir := GetRootDir()
+	configPath := filepath.Join(rootDir, "config.json")
+	file, err := os.Open(configPath)
 
 	if err != nil {
-		log.Fatalln("Missing ./config.json file")
+		log.Fatalln("Missing config.json file")
 	}
 
 	defer file.Close()
@@ -28,6 +39,8 @@ func LoadConfig() Config {
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
 		log.Fatalln("Invalid config.json file structure")
 	}
+
+	config.RootDir = rootDir
 
 	return config
 }

@@ -32,13 +32,13 @@ func userURL() string {
 	return url.String()
 }
 
-func timeEntriesURL(ctx *app.Context, userId string) string {
+func timeEntriesURL(appCtx *app.AppContext, userId string) string {
 	url, err := url.Parse(apiUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	url = url.JoinPath("workspaces", ctx.Config.WorkspaceId, "user", userId, "time-entries")
+	url = url.JoinPath("workspaces", appCtx.Config.WorkspaceId, "user", userId, "time-entries")
 
 	urlQuery := url.Query()
 	urlQuery.Add("page-size", "5000")
@@ -48,13 +48,13 @@ func timeEntriesURL(ctx *app.Context, userId string) string {
 	return url.String()
 }
 
-func FetchUserId(ctx *app.Context) (string, error) {
-	client := ctx.HTTPClient
+func FetchUserId(appCtx *app.AppContext) (string, error) {
+	client := appCtx.HTTPClient
 	req, err := PrepareHTTPRequest(userURL())
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("x-api-key", ctx.Config.ClockifyApiKey)
+	req.Header.Add("x-api-key", appCtx.Config.ClockifyApiKey)
 
 	response, err := client.Do(req)
 	if err != nil {
@@ -68,19 +68,19 @@ func FetchUserId(ctx *app.Context) (string, error) {
 	return responseData.Id, err
 }
 
-func FetchTimeEntries(ctx *app.Context) ([]ClockifyTimeEntryData, error) {
-	client := ctx.HTTPClient
+func FetchTimeEntries(appCtx *app.AppContext) ([]ClockifyTimeEntryData, error) {
+	client := appCtx.HTTPClient
 
-	userId, err := FetchUserId(ctx)
+	userId, err := FetchUserId(appCtx)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := PrepareHTTPRequest(timeEntriesURL(ctx, userId))
+	req, err := PrepareHTTPRequest(timeEntriesURL(appCtx, userId))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("x-api-key", ctx.Config.ClockifyApiKey)
+	req.Header.Add("x-api-key", appCtx.Config.ClockifyApiKey)
 
 	response, err := client.Do(req)
 	if err != nil {

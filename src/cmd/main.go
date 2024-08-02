@@ -14,17 +14,17 @@ func main() {
 	log.Println("=     Daily Dashboard by R.J.     =")
 	log.Println("===================================")
 
-	ctx := app.NewContext()
+	appCtx := app.NewAppContext()
 	router := http.NewServeMux()
 
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DashboardHandler(w, r, ctx)
+		handlers.DashboardHandler(w, r, appCtx)
 	})
 	router.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "templates/favicon.ico")
 	})
 
-	port := ctx.Config.Port
+	port := appCtx.Config.Port
 	log.Printf("Server is running on port %v", port)
 
 	s := &http.Server{
