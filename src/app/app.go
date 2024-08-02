@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"time"
 )
 
 type AppContext struct {
@@ -11,7 +12,9 @@ type AppContext struct {
 
 func NewAppContext() *AppContext {
 	return &AppContext{
-		Config:     LoadConfig(),
-		HTTPClient: &http.Client{},
+		Config: LoadConfig(),
+		HTTPClient: &http.Client{
+			Timeout: 10 * time.Second,
+		},
 	}
 }
