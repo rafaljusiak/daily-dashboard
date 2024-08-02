@@ -31,7 +31,7 @@ terraform apply \
 
 cd $PROJECT_ROOT_DIR
 echo -e "\e[35m🐳 Building Docker image...\e[0m"
-TAG=$GCP_REGION-docker.pkg.dev/$GCP_PROJECT_ID/daily-dashboard-repository/daily-dashboard 
+TAG=$GCP_REGION-docker.pkg.dev/$GCP_PROJECT_ID/daily-dashboard-repo/daily-dashboard 
 docker build -f Dockerfile-prod -t daily-dashboard . || { echo "Error: Docker build failed."; exit 1; }
 docker tag daily-dashboard $TAG || { echo "Error: Docker tag failed."; exit 1; }
 

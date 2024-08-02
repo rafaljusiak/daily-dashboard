@@ -21,7 +21,7 @@ provider "google" {
 
 resource "google_artifact_registry_repository" "dailydashboardrepository" {
   location      = local.json_config["GCPRegion"]
-  repository_id = "daily-dashboard-repository"
+  repository_id = "daily-dashboard-repo"
   format        = "DOCKER"
 }
 
@@ -31,7 +31,7 @@ resource "google_cloud_run_service" "dailydashboard" {
   template {
     spec {
       containers {
-        image = "${local.json_config["GCPRegion"]}-docker.pkg.dev/${local.json_config["GCPProjectId"]}/daily-dashboard-repository/daily-dashboard"
+        image = "${local.json_config["GCPRegion"]}-docker.pkg.dev/${local.json_config["GCPProjectId"]}/daily-dashboard-repo/daily-dashboard"
       }
     }
   }
@@ -60,4 +60,12 @@ resource "google_cloud_run_service_iam_policy" "noauth" {
 
 output "url" {
   value = google_cloud_run_service.dailydashboard.status[0].url
+}
+
+output "gcp_project_id" {
+  value = local.json_config["GCPProjectId"]
+}
+
+output "gcp_region" {
+  value = local.json_config["GCPRegion"]
 }
