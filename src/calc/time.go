@@ -8,7 +8,9 @@ import (
 func SumDuration(timeEntries []external.ClockifyTimeEntryData) (int, error) {
 	minutes := 0
 	for _, timeEntry := range timeEntries {
-		convertedDuration, err := timeutils.ConvertDurationToMinutes(timeEntry.TimeInterval.Duration)
+		convertedDuration, err := timeutils.ConvertDurationToMinutes(
+			timeEntry.TimeInterval.Duration,
+		)
 		if err != nil {
 			return 0, err
 		}

@@ -17,9 +17,12 @@ func main() {
 	appCtx := app.NewAppContext()
 	router := http.NewServeMux()
 
-	router.Handle("GET /", app.EnforceAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.DashboardHandler(w, r, appCtx)
-	}), appCtx))
+	router.Handle(
+		"GET /",
+		app.EnforceAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			handlers.DashboardHandler(w, r, appCtx)
+		}), appCtx),
+	)
 	router.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetLoginHandler(w, r, appCtx)
 	})
