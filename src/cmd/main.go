@@ -17,8 +17,14 @@ func main() {
 	appCtx := app.NewAppContext()
 	router := http.NewServeMux()
 
-	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+	router.Handle("GET /", app.EnforceAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		handlers.DashboardHandler(w, r, appCtx)
+	}), appCtx))
+	router.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetLoginHandler(w, r, appCtx)
+	})
+	router.HandleFunc("POST /login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.PostLoginHandler(w, r, appCtx)
 	})
 	router.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "templates/favicon.ico")

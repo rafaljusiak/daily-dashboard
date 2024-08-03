@@ -11,6 +11,7 @@ type Config struct {
 	City           string
 	ClockifyApiKey string
 	HourlyRate     float64
+	Password       string
 	Port           string
 	RootDir        string
 	WorkspaceId    string

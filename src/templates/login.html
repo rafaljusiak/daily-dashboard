@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Daily Dashboard | Login</title>
+    </head>
+    <body>
+        {{ if .Errors }}
+        {{ range .Errors }}
+        <p style="color: red">{{.}}</p>
+        {{ end }}
+        {{ end }}
+        <p>Type password:</p>
+        <form action="/login" method="post">
+            <input type="password" name="password" value="" />
+            <button type="submit">Login</button>
+        </form>
+    </body>
+</html>
