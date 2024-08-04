@@ -4,6 +4,7 @@
     "GCPRegion": "europe-central2",
     "GCPZone": "europe-central2-a",
     "HourlyRate": 10.0,
+	"MongoURI": "mongodb://mongo:27017",
 	"Password": "<PASSWORD>",
     "Port": ":8080",
     "WorkspaceId": "<ID>"
