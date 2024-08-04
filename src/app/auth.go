@@ -14,18 +14,15 @@ func HashPassword(password string) string {
 	return hex.EncodeToString(algorithm.Sum(nil))
 }
 
-func EnforceAuthMiddleware(next http.Handler, appCtx *AppContext) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie(SessionIdCookieName)
-		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-		if cookie.Value != HashPassword(appCtx.Config.Password) {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
+func CheckAuth(w http.ResponseWriter, r *http.Request, appCtx *AppContext) {
+	cookie, err := r.Cookie(SessionIdCookieName)
+	if err != nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+	if cookie.Value != HashPassword(appCtx.Config.Password) {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
 }
+

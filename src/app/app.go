@@ -16,10 +16,10 @@ type AppContext struct {
 	MongoClient *mongo.Client
 }
 
-func NewAppContext() *AppContext {
+func NewAppContext(ctx context.Context) *AppContext {
 	config := LoadConfig()
 	httpClient := NewHTTPClient()
-	mongoClient := NewMongoClient(config)
+	mongoClient := NewMongoClient(ctx, config)
 
 	return &AppContext{
 		Config:      config,
@@ -34,17 +34,17 @@ func NewHTTPClient() *http.Client {
 	}
 }
 
-func NewMongoClient(config Config) *mongo.Client {
+func NewMongoClient(ctx context.Context, config Config) *mongo.Client {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(config.MongoURI).SetServerAPIOptions(serverAPI)
 
-	client, err := mongo.Connect(context.TODO(), opts)
+	client, err := mongo.Connect(ctx, opts)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = client.Ping(context.TODO(), nil)
+	err = client.Ping(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

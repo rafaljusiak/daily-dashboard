@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -10,28 +11,13 @@ import (
 )
 
 func main() {
-	log.Println("===================================")
-	log.Println("=     Daily Dashboard by R.J.     =")
-	log.Println("===================================")
+	log.Println("============================")
+	log.Println("=     Daily Dashboard      =")
+	log.Println("============================")
 
-	appCtx := app.NewAppContext()
-	router := http.NewServeMux()
-
-	router.Handle(
-		"GET /",
-		app.EnforceAuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			handlers.DashboardHandler(w, r, appCtx)
-		}), appCtx),
-	)
-	router.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetLoginHandler(w, r, appCtx)
-	})
-	router.HandleFunc("POST /login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.PostLoginHandler(w, r, appCtx)
-	})
-	router.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "templates/favicon.ico")
-	})
+	ctx := context.Background()
+	appCtx := app.NewAppContext(ctx)
+	router := handlers.SetupRouter(appCtx)
 
 	port := appCtx.Config.Port
 	log.Printf("Server is running on port %v", port)
