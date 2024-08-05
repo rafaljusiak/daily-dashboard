@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
-	"github.com/rafaljusiak/daily-dashboard/calc"
 	"github.com/rafaljusiak/daily-dashboard/external"
+	"github.com/rafaljusiak/daily-dashboard/income"
 	"github.com/rafaljusiak/daily-dashboard/timeutils"
 )
 
@@ -96,19 +96,19 @@ func prepareDashboardData(appCtx *app.AppContext) (*DashboardData, error) {
 		}
 	}
 
-	alreadyWorkedMinutes, err := calc.SumDuration(timeEntries)
+	alreadyWorkedMinutes, err := external.SumClockifyTime(timeEntries)
 	if err != nil {
 		errors = append(errors, fmt.Sprintf("error calculating already worked minutes: %v", err))
 	}
 
-	currentIncome := calc.Income(
+	currentIncome := income.Calculate(
 		timeutils.MinutesToHours(alreadyWorkedMinutes),
 		appCtx.Config.HourlyRate,
 		exchangeRate,
 	)
 
 	workingHours := timeutils.WorkingHoursForCurrentMonth()
-	optimalIncome := calc.Income(
+	optimalIncome := income.Calculate(
 		float64(workingHours),
 		appCtx.Config.HourlyRate,
 		exchangeRate,
