@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Daily Dashboard | Archival</title>
+    </head>
+    <body>
+        {{ if .Errors }}
+        {{ range .Errors }}
+        <p style="color: red">{{.}}</p>
+        {{ end }}
+        {{ end }}
+        <button type="button" onclick="window.location.href='/'">Return</button>
+        <form action="/sync" method="post">
+            <button type="submit">Sync</button>
+        </form>
+    </body>
+</html>

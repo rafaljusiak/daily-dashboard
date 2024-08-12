@@ -10,8 +10,10 @@ func SetupRouter(appCtx *app.AppContext) *http.ServeMux {
 	router := http.NewServeMux()
 
 	router.Handle("GET /", setHandler(DashboardHandler, appCtx, withRequiredAuth))
+	router.Handle("GET /archive", setHandler(ArchiveHandler, appCtx, withRequiredAuth))
 	router.Handle("GET /login", setHandler(GetLoginHandler, appCtx))
 	router.Handle("POST /login", setHandler(PostLoginHandler, appCtx))
+	router.Handle("POST /sync", setHandler(SyncHandler, appCtx, withRequiredAuth))
 
 	router.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "templates/favicon.ico")
