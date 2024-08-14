@@ -32,7 +32,12 @@ func userURL() string {
 	return url.String()
 }
 
-func timeEntriesURL(appCtx *app.AppContext, userId string) string {
+func timeEntriesURL(
+	appCtx *app.AppContext,
+	userId string,
+	startDate time.Time,
+	endDate time.Time,
+) string {
 	url, err := url.Parse(apiUrl)
 	if err != nil {
 		log.Fatal(err)
@@ -42,7 +47,8 @@ func timeEntriesURL(appCtx *app.AppContext, userId string) string {
 
 	urlQuery := url.Query()
 	urlQuery.Add("page-size", "5000")
-	urlQuery.Add("start", timeutils.FirstDayOfMonth(time.Now()).Format(time.RFC3339))
+	urlQuery.Add("start", startDate.Format(time.RFC3339))
+	urlQuery.Add("end", endDate.Format(time.RFC3339))
 
 	url.RawQuery = urlQuery.Encode()
 	return url.String()
@@ -68,7 +74,11 @@ func FetchUserId(appCtx *app.AppContext) (string, error) {
 	return responseData.Id, err
 }
 
-func FetchTimeEntries(appCtx *app.AppContext) ([]ClockifyTimeEntryData, error) {
+func FetchClockifyTimeEntries(
+	appCtx *app.AppContext,
+	startDate time.Time,
+	endDate time.Time,
+) ([]ClockifyTimeEntryData, error) {
 	client := appCtx.HTTPClient
 
 	userId, err := FetchUserId(appCtx)
@@ -76,7 +86,7 @@ func FetchTimeEntries(appCtx *app.AppContext) ([]ClockifyTimeEntryData, error) {
 		return nil, err
 	}
 
-	req, err := PrepareHTTPRequest(timeEntriesURL(appCtx, userId))
+	req, err := PrepareHTTPRequest(timeEntriesURL(appCtx, userId, startDate, endDate))
 	if err != nil {
 		return nil, err
 	}

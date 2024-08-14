@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"time"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
 	"github.com/rafaljusiak/daily-dashboard/external"
@@ -60,7 +61,9 @@ func prepareDashboardData(appCtx *app.AppContext) (*DashboardData, error) {
 	}()
 
 	go func() {
-		timeEntries, err := external.FetchTimeEntries(appCtx)
+		startDate := timeutils.FirstDayOfMonth(time.Now())
+		endDate := timeutils.LastDayOfMonth(time.Now())
+		timeEntries, err := external.FetchClockifyTimeEntries(appCtx, startDate, endDate)
 		if err != nil {
 			errChan <- fmt.Errorf("error while fetching Clockify time entries: %v", err)
 			return

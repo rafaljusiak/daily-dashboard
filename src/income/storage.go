@@ -13,6 +13,7 @@ type IncomeDocument struct {
 	TimeHours    float64 `bson:"time_hours,omitempty"`
 	HourlyRate   float64 `bson:"hourly_rate,omitempty"`
 	ExchangeRate float64 `bson:"exchange_rate,omitempty"`
+	TotalIncome  float64 `bson:"total_income,omitempty"`
 }
 
 func getCollection(appCtx *app.AppContext) *mongo.Collection {
@@ -67,4 +68,25 @@ func GetDocumentByDate(
 	}
 
 	return document, nil
+}
+
+func GetDocumentList(appCtx *app.AppContext, ctx context.Context) ([]IncomeDocument, error) {
+	collection := getCollection(appCtx)
+
+	var documents []IncomeDocument
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	for cursor.Next(ctx) {
+		var document IncomeDocument
+		err = cursor.Decode(&document)
+		if err != nil {
+			return nil, err
+		}
+		documents = append(documents, document)
+	}
+
+	return documents, nil
 }
