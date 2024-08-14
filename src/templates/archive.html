@@ -14,5 +14,17 @@
         <form action="/sync" method="post">
             <button type="submit">Sync</button>
         </form>
+        <hr />
+        {{ range $index, $doc := .IncomeDocs }}
+        <h2>
+            <strong>{{$doc.Date}}</strong>
+        </h2>
+        <ul>
+            <li>Income: {{$doc.TotalIncome}}</li>
+            <li>Hours: {{$doc.TimeString}}</li>
+            <li>Hourly rate: {{$doc.HourlyRate}}</li>
+            <li>Exchange rate: {{$doc.ExchangeRate}}</li>
+        </ul>
+        {{ end }}
     </body>
 </html>

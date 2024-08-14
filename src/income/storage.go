@@ -4,16 +4,21 @@ import (
 	"context"
 
 	"github.com/rafaljusiak/daily-dashboard/app"
+	"github.com/rafaljusiak/daily-dashboard/timeutils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type IncomeDocument struct {
 	Date         string  `bson:"date"`
-	TimeHours    float64 `bson:"time_hours,omitempty"`
+	TimeMinutes  int     `bson:"time_minutes,omitempty"`
 	HourlyRate   float64 `bson:"hourly_rate,omitempty"`
 	ExchangeRate float64 `bson:"exchange_rate,omitempty"`
 	TotalIncome  float64 `bson:"total_income,omitempty"`
+}
+
+func (document IncomeDocument) TimeString() string {
+	return timeutils.MinutesToString(document.TimeMinutes)
 }
 
 func getCollection(appCtx *app.AppContext) *mongo.Collection {

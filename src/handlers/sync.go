@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,27 +13,50 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func SyncHandler(w http.ResponseWriter, r *http.Request, appCtx *app.AppContext) {
-	previousMonth := time.Now().AddDate(0, -1, 0)
+var ErrNoClockifyData = errors.New("no clockify data")
 
-	startDate := timeutils.FirstDayOfMonth(previousMonth)
-	endDate := timeutils.LastDayOfMonth(previousMonth)
+func SyncHandler(w http.ResponseWriter, r *http.Request, appCtx *app.AppContext) {
+	processedDate := time.Now()
+
+	for {
+		processedDate = processedDate.AddDate(0, 0, -1)
+		err := processMonth(appCtx, r, processedDate)
+
+		if err == ErrNoClockifyData {
+			break
+		} else if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	http.Redirect(w, r, "/archive", http.StatusFound)
+}
+
+func processMonth(
+	appCtx *app.AppContext,
+	r *http.Request,
+	processedMonth time.Time,
+) error {
+	startDate := timeutils.FirstDayOfMonth(processedMonth)
+	endDate := timeutils.LastDayOfMonth(processedMonth)
 	timeEntries, err := external.FetchClockifyTimeEntries(appCtx, startDate, endDate)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	totalTime, err := external.SumClockifyTime(timeEntries)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
+	}
+
+	if totalTime == 0 {
+		return ErrNoClockifyData
 	}
 
 	exchangeRate, err := external.FetchNBPExchangeRate(appCtx.HTTPClient)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	totalIncome := income.Calculate(
@@ -40,16 +65,18 @@ func SyncHandler(w http.ResponseWriter, r *http.Request, appCtx *app.AppContext)
 		exchangeRate,
 	)
 
-	formattedDate := previousMonth.Format("2006-01-02")
+	formattedDate := endDate.Format("2006-01-02")
 	incomeDoc, err := income.GetDocumentByDate(
 		appCtx,
 		r.Context(),
 		formattedDate,
 	)
+
 	if err == mongo.ErrNoDocuments {
+		log.Printf("No document for the %s month, inserting new one", formattedDate)
 		incomeDoc = income.IncomeDocument{
 			Date:         formattedDate,
-			TimeHours:    timeutils.MinutesToHours(totalTime),
+			TimeMinutes:  totalTime,
 			HourlyRate:   appCtx.Config.HourlyRate,
 			ExchangeRate: exchangeRate,
 			TotalIncome:  totalIncome,
@@ -57,22 +84,20 @@ func SyncHandler(w http.ResponseWriter, r *http.Request, appCtx *app.AppContext)
 
 		err = income.InsertDocument(appCtx, r.Context(), incomeDoc)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return err
 		}
 	} else if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	} else {
-		incomeDoc.TimeHours = timeutils.MinutesToHours(totalTime)
+		log.Println("Updating existing document")
+		incomeDoc.TimeMinutes = totalTime
 		incomeDoc.ExchangeRate = exchangeRate
 		incomeDoc.TotalIncome = totalIncome
 		err = income.UpdateDocument(appCtx, r.Context(), incomeDoc)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return err
 		}
 	}
 
-	http.Redirect(w, r, "/", http.StatusFound)
+	return nil
 }
