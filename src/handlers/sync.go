@@ -16,13 +16,17 @@ import (
 var ErrNoClockifyData = errors.New("no clockify data")
 
 func SyncHandler(w http.ResponseWriter, r *http.Request, appCtx *app.AppContext) {
+	log.Println("Syncing data")
 	processedDate := time.Now()
 
 	for {
-		processedDate = processedDate.AddDate(0, 0, -1)
+		processedDate = processedDate.AddDate(0, -1, 0)
 		err := processMonth(appCtx, r, processedDate)
 
+		log.Println("Processing date: ", processedDate)
+
 		if err == ErrNoClockifyData {
+			log.Println("No more data to process")
 			break
 		} else if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
