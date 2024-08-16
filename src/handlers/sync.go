@@ -58,7 +58,7 @@ func processMonth(
 		return ErrNoClockifyData
 	}
 
-	exchangeRate, err := external.FetchNBPExchangeRate(appCtx.HTTPClient)
+	exchangeRate, err := external.FetchArchivalNBPExchangeRate(appCtx.HTTPClient, endDate)
 	if err != nil {
 		return err
 	}

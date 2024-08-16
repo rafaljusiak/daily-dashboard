@@ -73,3 +73,13 @@ func ConvertDurationToMinutes(duration string) (int, error) {
 
 	return hours*60 + minutes, nil
 }
+
+func GetMonthLaterOrToday(t time.Time) time.Time {
+	monthLater := t.AddDate(0, 1, 0)
+	now := time.Now()
+	if monthLater.After(now) {
+		return now
+	}
+
+	return monthLater
+}
